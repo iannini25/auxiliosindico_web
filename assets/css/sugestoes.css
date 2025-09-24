@@ -1,0 +1,391 @@
+/* === Tokens === */
+:root {
+    --bg: #0f1115;
+    --surface: #141822;
+    --text: #e7eaf0;
+    --muted: #a7b0c0;
+    --brand: #6c8cff;
+    --ok: #4cc38a;
+    --warn: #f5b14e;
+    --info: #7aa2f7;
+    --alert: #ef6060;
+    --radius: 16px;
+    --shadow: 0 8px 20px rgba(0, 0, 0, .25);
+    --maxw: 540px;
+    color-scheme: dark;
+}
+
+/* === Reset/Background === */
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    background-image: radial-gradient(1200px 600px at 50% -10%, #1b2130 0%, rgba(27, 33, 48, 0) 60%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center top;
+    background-size: 1200px 600px;
+    color: var(--text);
+    font: 500 16px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* === Layout === */
+.page {
+    display: grid;
+    /* antes: place-items:center; -> fazia “pular” o topo */
+    align-items: start;
+    justify-items: center;
+    padding: 30px;
+}
+
+.app {
+    width: 100%;
+    max-width: var(--maxw);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 16px;
+    /* altura real da janela, sem empurrar com padding-top */
+    min-height: 100vh;
+}
+
+/* usa viewport dinâmica quando disponível (corrige iOS/Android) */
+@supports (min-height: 100dvh) {
+    .app {
+        min-height: 100dvh;
+    }
+}
+
+/* === Header === */
+.app__header {
+    text-align: center;
+    padding: 8px 4px 0;
+}
+
+.brand__title {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: .2px;
+}
+
+.brand__subtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* === Footer === */
+.app__footer {
+    display: grid;
+    place-items: center;
+    padding: 8px 0 4px;
+}
+
+.footer-nav {
+    margin-bottom: 6px;
+}
+
+.footer-nav__link {
+    color: var(--brand);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.footer-nav__link:hover {
+    text-decoration: underline;
+}
+
+.app__meta {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* === Conteúdo === */
+.suggest-box {
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+    border: 1px solid rgba(255, 255, 255, .10);
+    border-radius: calc(var(--radius) + 4px);
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.suggest-form {
+    display: grid;
+    gap: 10px;
+}
+
+.suggest-form__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.suggest-form__input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .05);
+    color: var(--text);
+    font-size: 14px;
+    resize: vertical;
+}
+
+.suggest-form__input::placeholder {
+    /* corrigido: espaço em "var(--muted) 85%" */
+    color: color-mix(in oklab, var(--muted) 85%, white 15%);
+}
+
+.suggest-form__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.suggest-form__btn {
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(180deg,
+            color-mix(in oklab, var(--brand) 85%, black 0%),
+            color-mix(in oklab, var(--brand) 65%, black 0%));
+    color: #fff;
+    font-weight: 900;
+    font-size: 14px;
+    cursor: pointer;
+    transition: filter .15s ease, transform .1s ease;
+}
+
+.suggest-form__btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.suggest-form__btn:active {
+    transform: translateY(0);
+}
+
+.suggest-form__hint {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.suggestions {
+    display: grid;
+    gap: 12px;
+    padding-top: 8px;
+    grid-template-columns: 1fr;
+}
+
+.suggest-card {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+    border: 1px solid rgba(255, 255, 255, .10);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.suggest-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--brand);
+    opacity: .9;
+}
+
+.suggest-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed rgba(255, 255, 255, .12);
+}
+
+.suggest-card__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: .2px;
+}
+
+.suggest-card__desc {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.suggest-card__meta {
+    margin-top: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.suggest-meta__sep {
+    opacity: .6;
+}
+
+.suggest-votes {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 12px;
+    padding: 8px 10px;
+}
+
+.vote-btn {
+    width: 40px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+    font-weight: 900;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform .08s ease, filter .12s ease;
+}
+
+.vote-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.vote-btn:active {
+    transform: translateY(0);
+}
+
+.vote-btn--no {
+    background: linear-gradient(180deg, color-mix(in oklab, var(--alert) 85%, black 0%), color-mix(in oklab, var(--alert) 65%, black 0%));
+}
+
+.vote-btn--yes {
+    background: linear-gradient(180deg, color-mix(in oklab, var(--ok) 85%, black 0%), color-mix(in oklab, var(--ok) 65%, black 0%));
+}
+
+.vote-count {
+    text-align: center;
+    font-weight: 800;
+}
+
+/* destaque do voto do usuário */
+.vote-btn.is-active {
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.25);
+  filter: brightness(1.08);
+}
+
+/* contagem de votos no centro */
+.vote-tally {
+  text-align: center;
+  font-weight: 800;
+}
+.vote-tally b {
+  font-weight: 900;
+}
+
+
+/* === ≤640px === */
+@media (max-width: 640px) {
+    .brand__title {
+        font-size: 26px;
+    }
+
+    .suggestions {
+      
+        gap: 12px;
+    }
+
+    .suggest-card {
+        padding: 12px;
+    }
+
+    .suggest-card__title {
+        font-size: 14px;
+    }
+
+    .suggest-card__desc {
+        font-size: 12px;
+    }
+
+    .suggest-card__meta {
+        font-size: 11px;
+    }
+}
+
+/* === ≤430px === */
+@media (max-width: 430px) {
+
+    /* evita glitch do fundo fixo no iOS */
+    body {
+        background-attachment: scroll;
+    }
+
+    .page {
+        padding: 20px;
+    }
+
+    .brand__title {
+        font-size: 24px;
+    }
+
+    .brand__subtitle {
+        font-size: 13px;
+    }
+
+    .suggestions {
+        
+        gap: 10px;
+    }
+
+    .suggest-card {
+        padding: 8px;
+        border-radius: 12px;
+        min-height: 120px;
+    }
+
+    .suggest-card__head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .suggest-card__title {
+        font-size: 13px;
+    }
+
+    .suggest-card__desc {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    .suggest-card__meta {
+        font-size: 10px;
+    }
+}

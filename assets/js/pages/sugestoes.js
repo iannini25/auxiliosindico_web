@@ -1,0 +1,125 @@
+import { db, serverTimestamp } from "../core/firebaseStore.js";
+import {
+  collection, addDoc, doc, setDoc, getDoc, onSnapshot, query, where, orderBy, deleteDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getCurrentUserWithRole } from "../core/store.js";
+
+export async function initSugestoes() {
+  const { user, profile } = await getCurrentUserWithRole();
+  if (!user) return;
+
+  const form = document.querySelector(".suggest-form");
+  const list = document.querySelector(".suggestions");
+  if (!form || !list) return;
+
+  // enviar
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const ta = form.querySelector("#sugestao");
+    const text = (ta?.value || "").trim();
+    if (!text) return alert("Escreva a sugestão.");
+    const [title, ...rest] = text.split(/\n/);
+    const description = rest.join("\n").trim();
+
+    try {
+      await addDoc(collection(db, "suggestions"), {
+        title: title.slice(0, 120),
+        description,
+        text,
+        status: "pendente",
+        createdAt: serverTimestamp(),
+        authorUid: user.uid,
+        authorName: profile?.name || "",
+        authorApt: profile?.apt || null,
+      });
+      ta.value = "";
+    } catch (err) { alert(err.message); }
+  });
+
+  // listar (pendentes e aprovadas) — se você criou o índice, mantenha o orderBy
+  const q = query(
+    collection(db, "suggestions"),
+    where("status", "in", ["pendente", "aprovada"]),
+    orderBy("createdAt", "desc")
+  );
+  onSnapshot(q, (snap) => {
+    list.innerHTML = "";
+    snap.forEach((d) => list.appendChild(renderSuggestion(d.id, d.data(), user.uid)));
+  });
+}
+
+function renderSuggestion(id, s, myUid) {
+  const el = document.createElement("article");
+  el.className = "suggest-card";
+  const when = s.createdAt?.toDate ? s.createdAt.toDate().toLocaleDateString() : "—";
+  el.innerHTML = `
+    <div class="suggest-card__head"><h2 class="suggest-card__title">${esc(s.title || "Sugestão")}</h2></div>
+    <p class="suggest-card__desc">${esc(s.description || "")}</p>
+    <div class="suggest-card__meta">
+      <span class="suggest-meta__item">Enviado por: ${esc(s.authorName || "Morador")}</span>
+      <span class="suggest-meta__sep">•</span>
+      <time class="suggest-meta__item">${when}</time>
+    </div>
+
+    <div class="suggest-votes" role="group" aria-label="Votação">
+      <button class="vote-btn vote-btn--no"  type="button" aria-pressed="false" aria-label="Votar contra">✕</button>
+      <span class="vote-tally">
+        <b data-no>0</b> 
+        <span class="suggest-meta__sep">•</span>
+        <b data-yes>0</b> 
+      </span>
+      <button class="vote-btn vote-btn--yes" type="button" aria-pressed="false" aria-label="Votar a favor">✓</button>
+    </div>
+  `;
+
+  const yesBtn = el.querySelector(".vote-btn--yes");
+  const noBtn  = el.querySelector(".vote-btn--no");
+  const yesCnt = el.querySelector("[data-yes]");
+  const noCnt  = el.querySelector("[data-no]");
+
+  // placar + meu voto (ao vivo)
+  const votesQ = query(collection(db, "suggestionVotes"), where("suggestionId", "==", id));
+  onSnapshot(votesQ, (vs) => {
+    let yes = 0, no = 0, my = null;
+    vs.forEach((v) => {
+      const d = v.data();
+      if (d.value === "yes") yes++;
+      if (d.value === "no")  no++;
+      if (d.uid === myUid)   my = d.value;
+    });
+    yesCnt.textContent = String(yes);
+    noCnt.textContent  = String(no);
+
+    // estado visual (não desabilita; permite retirar/trocar)
+    yesBtn.classList.toggle("is-active", my === "yes");
+    noBtn.classList.toggle("is-active",  my === "no");
+    yesBtn.setAttribute("aria-pressed", my === "yes" ? "true" : "false");
+    noBtn.setAttribute("aria-pressed",  my === "no"  ? "true" : "false");
+  });
+
+  yesBtn.addEventListener("click", () => vote(id, myUid, "yes"));
+  noBtn.addEventListener("click",  () => vote(id, myUid, "no"));
+  return el;
+}
+
+// 1 voto por pessoa:
+// - se não votou -> cria doc
+// - se clicou no MESMO voto -> remove doc (retira voto)
+// - se clicou no OUTRO voto -> atualiza doc (troca)
+async function vote(suggestionId, uid, value) {
+  const ref = doc(db, "suggestionVotes", `${suggestionId}_${uid}`);
+  const ex  = await getDoc(ref);
+
+  if (!ex.exists()) {
+    await setDoc(ref, { suggestionId, uid, value, createdAt: serverTimestamp() });
+    return;
+  }
+  const curr = ex.data().value;
+  if (curr === value) {
+    await deleteDoc(ref); // retirar voto
+  } else {
+    await updateDoc(ref, { value, changedAt: serverTimestamp() }); // trocar voto
+  }
+}
+
+const esc = (s) => String(s || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));

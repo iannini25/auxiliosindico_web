@@ -1,0 +1,437 @@
+/* ========== Design tokens ========== */
+:root {
+    --bg: #0f1115;
+    --surface: #141822;
+    --text: #e7eaf0;
+    --muted: #a7b0c0;
+    --brand: #6c8cff;
+    --ok: #4cc38a;
+    --warn: #f5b14e;
+    --info: #7aa2f7;
+    --alert: #ef6060;
+    --radius: 16px;
+    --shadow: 0 8px 20px rgba(0, 0, 0, .25);
+    --maxw: 540px;
+    color-scheme: dark;
+}
+
+/* ========== Reset + fundo fixo ========== */
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    background-image: radial-gradient(1200px 600px at 50% -10%, #1b2130 0%, rgba(27, 33, 48, 0) 60%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center top;
+    background-size: 1200px 600px;
+    color: var(--text);
+    font: 500 16px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ========== Layout base ========== */
+.page {
+    display: grid;
+    /* antes: place-items:center; => causava “meio da tela” em vários devices */
+    align-items: start;
+    justify-items: center;
+    padding: 30px;
+}
+
+.app {
+    width: 100%;
+    max-width: var(--maxw);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 16px;
+
+    /* altura real da janela, sem empurrar com padding-top */
+    min-height: 100vh;
+}
+
+@supports (min-height: 100dvh) {
+    .app {
+        min-height: 100dvh;
+    }
+}
+
+/* ========== Header/Branding ========== */
+.app__header {
+    text-align: center;
+    padding: 8px 4px 0;
+}
+
+.brand__title {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: .2px;
+}
+
+.brand__subtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* ========== Footer ========== */
+.app__footer {
+    display: grid;
+    place-items: center;
+    padding: 8px 0 4px;
+}
+
+.app__meta {
+    color: var(--muted);
+    font-size: 12px
+}
+
+.footer-nav {
+    margin-bottom: 6px
+}
+
+.footer-nav__link {
+    color: var(--brand);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.footer-nav__link:hover {
+    text-decoration: underline
+}
+
+/* ========== Caixa de reclamação (topo) ========== */
+.complaint-box {
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+    border: 1px solid rgba(255, 255, 255, .10);
+    border-radius: calc(var(--radius) + 4px);
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.complaint-form {
+    display: grid;
+    gap: 10px
+}
+
+.complaint-form__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.complaint-form__input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, .05);
+    color: var(--text);
+    font-size: 14px;
+    resize: vertical;
+}
+
+.complaint-form__input::placeholder {
+    color: color-mix(in oklab, var(--muted) 85%, white 15%);
+}
+
+/* linha: select + botão */
+.complaint-form__row {
+    display: grid;
+    grid-template-columns: 1fr minmax(120px, 160px);
+    gap: 8px;
+}
+
+/* select (tema escuro legível) */
+.complaint-form__select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: #1b2130;
+    color: var(--text);
+    font-size: 14px;
+    appearance: none;
+}
+
+/* botão ENVIAR */
+.complaint-form__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(180deg,
+            color-mix(in oklab, var(--alert) 60%, black 0%),
+            color-mix(in oklab, var(--alert) 45%, black 0%));
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .2px;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 120px;
+    transition: transform .08s ease, filter .12s ease;
+}
+
+.complaint-form__btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px)
+}
+
+.complaint-form__btn:active {
+    transform: translateY(0)
+}
+
+.complaint-form__btn:focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--brand) 55%, white 0%);
+    outline-offset: 2px
+}
+
+.complaint-form__hint {
+    color: var(--muted);
+    font-size: 13px
+}
+
+/* ========== Lista de reclamações (cards) ========== */
+.complaints {
+    display: grid;
+    gap: 12px;
+    padding-top: 12px
+}
+
+.complaint-card {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+    border: 1px solid rgba(255, 255, 255, .10);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.complaint-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--brand);
+    opacity: .9;
+}
+
+.complaint-card--alert::before {
+    background: var(--alert)
+}
+
+.complaint-card--warn::before {
+    background: var(--warn)
+}
+
+.complaint-card--info::before {
+    background: var(--info)
+}
+
+.complaint-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed rgba(255, 255, 255, .12);
+}
+
+.complaint-card__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: .2px;
+}
+
+.complaint-card__desc {
+    margin: 6px 0 0;
+    font-size: 14px
+}
+
+.complaint-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.complaint-card__meta .whatsapp-btn {
+    flex-basis: 100%;
+    margin-top: 8px;
+}
+
+.complaint-meta__sep {
+    opacity: .6
+}
+
+/* badge da categoria/urgência */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .12);
+    white-space: nowrap;
+}
+
+.badge--impact {
+    background: color-mix(in oklab, var(--alert) 20%, transparent);
+    color: #fff;
+}
+
+/* botão WhatsApp */
+.whatsapp-btn {
+    margin-top: 8px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    background: linear-gradient(180deg,
+        color-mix(in oklab, var(--ok) 85%, black 0%),
+        color-mix(in oklab, var(--ok) 65%, black 0%));
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    text-decoration: none;
+    transition: filter .12s ease, transform .08s ease;
+
+    /* 🔽 força o botão a ocupar uma linha separada */
+    display: block;
+    width: fit-content;
+}
+
+
+.whatsapp-btn:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px)
+}
+
+.whatsapp-btn:active {
+    transform: translateY(0)
+}
+
+.whatsapp-btn__icon {
+    font-weight: 900
+}
+
+/* ===== Categorias: cores da barrinha lateral ===== */
+.complaint-card--manutencao::before {
+    background: var(--info);
+}
+
+/* azul */
+.complaint-card--limpeza::before {
+    background: var(--ok);
+}
+
+/* verde */
+.complaint-card--seguranca::before {
+    background: var(--alert);
+}
+
+/* vermelho */
+.complaint-card--barulho::before {
+    background: var(--warn);
+}
+
+/* laranja */
+.complaint-card--convivencia::before {
+    background: var(--brand);
+}
+
+/* roxo/azulado */
+
+/* ===== Categorias: variantes do badge ===== */
+.badge--manutencao {
+    background: color-mix(in oklab, var(--info) 20%, transparent);
+    border-color: color-mix(in oklab, var(--info) 55%, black 0%);
+    color: #fff;
+}
+
+.badge--limpeza {
+    background: color-mix(in oklab, var(--ok) 20%, transparent);
+    border-color: color-mix(in oklab, var(--ok) 55%, black 0%);
+    color: #ffffff;
+}
+
+.badge--seguranca {
+    background: color-mix(in oklab, var(--alert) 20%, transparent);
+    border-color: color-mix(in oklab, var(--alert) 55%, black 0%);
+    color: #fff;
+}
+
+.badge--barulho {
+    background: color-mix(in oklab, var(--warn) 20%, transparent);
+    border-color: color-mix(in oklab, var(--warn) 55%, black 0%);
+    color: #261a00;
+}
+
+.badge--convivencia {
+    background: color-mix(in oklab, var(--brand) 20%, transparent);
+    border-color: color-mix(in oklab, var(--brand) 55%, black 0%);
+    color: #fff;
+}
+
+
+/* ========== Breakpoints ========== */
+@media (max-width:640px) {
+    .brand__title {
+        font-size: 26px
+    }
+}
+
+@media (max-width:430px) {
+
+    /* evita glitch do fundo fixo no iOS */
+    body {
+        background-attachment: scroll;
+    }
+
+    .page {
+        padding: 20px
+    }
+
+    .brand__title {
+        font-size: 24px
+    }
+
+    .brand__subtitle {
+        font-size: 13px
+    }
+
+    .complaint-form__row {
+        grid-template-columns: 1fr;
+    }
+
+    .complaint-form__btn {
+        width: 100%
+    }
+}

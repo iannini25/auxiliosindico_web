@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sugestões – Prédio</title>
+    <meta name="description" content="Envie e vote em sugestões para melhorar o prédio." />
+    <link rel="stylesheet" href="assets/css/sugestoes.css" />
+    <script type="module" src="assets/js/main.js" defer></script>
+</head>
+
+<body class="page" data-page="sugestoes">
+
+    <script type="module">
+        import { requireAuth } from "/assets/js/core/auth.js";
+        requireAuth();
+    </script>
+
+    <main class="app" role="main">
+        <header class="app__header">
+            <h1 class="brand__title">Sugestões</h1>
+            <p class="brand__subtitle">Envie ideias e vote nas melhores</p>
+        </header>
+
+        <!-- Caixa de sugestão (topo) -->
+        <section class="suggest-box" aria-label="Enviar sugestão">
+            <form class="suggest-form" action="#" method="post">
+                <label class="suggest-form__label" for="sugestao">Sua sugestão</label>
+                <textarea class="suggest-form__input" id="sugestao" name="sugestao" rows="3"
+                    placeholder="Descreva sua ideia (ex.: instalar bicicletário coberto)…"></textarea>
+                <div class="suggest-form__row">
+                    <button class="suggest-form__btn" type="submit" aria-label="Enviar sugestão">Enviar</button>
+                </div>
+                <small class="suggest-form__hint">Sugestões novas aparecem logo abaixo. Sem JavaScript por enquanto —
+                    layout apenas.</small>
+            </form>
+        </section>
+
+
+        <!-- Lista de sugestões (cards com votos) -->
+        <section class="suggestions" aria-label="Sugestões da comunidade">
+            
+
+                
+        </section>
+
+        <footer class="app__footer">
+            <nav class="footer-nav">
+                <a href="index.html" class="footer-nav__link">← Voltar ao início</a>
+            </nav>
+            <small class="app__meta">v0.3 · Ed. José Lopes</small>
+        </footer>
+    </main>
+</body>
+
+</html>

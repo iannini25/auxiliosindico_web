@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Queixas – Prédio</title>
+    <meta name="description" content="Reporte problemas e acompanhe as queixas do prédio." />
+    <link rel="stylesheet" href="assets/css/queixas.css" />
+    <script type="module" src="assets/js/main.js" defer></script>
+</head>
+
+<body class="page" data-page="queixas">
+
+    <script type="module">
+        import { requireAuth } from "/assets/js/core/auth.js";
+        requireAuth();
+    </script>
+
+    <main class="app" role="main">
+        <header class="app__header">
+            <h1 class="brand__title">Queixas</h1>
+            <p class="brand__subtitle">Reporte problemas e entre em contato com os responsáveis</p>
+        </header>
+
+        <!-- Caixa de reclamação (topo) -->
+        <section class="complaint-box" aria-label="Enviar reclamação">
+            <form class="complaint-form" action="#" method="post">
+                <label class="complaint-form__label" for="reclamacao">Descreva o problema</label>
+                <textarea class="complaint-form__input" id="reclamacao" name="reclamacao" rows="3"
+                    placeholder="Explique o problema (ex.: barulho após horário, lâmpada queimada no bloco C)…"></textarea>
+
+                <div class="complaint-form__row">
+                    <select class="complaint-form__select" name="categoria" aria-label="Categoria">
+                        <option value="" disabled selected>Categoria</option>
+                        <option>Manutenção</option>
+                        <option>Limpeza</option>
+                        <option>Segurança</option>
+                        <option>Barulho</option>
+                        <option>Convivência</option>
+                    </select>
+
+
+                    <button class="complaint-form__btn" type="submit" aria-label="Enviar reclamação">Enviar</button>
+                </div>
+
+                <small class="complaint-form__hint">
+                    Sem JS por enquanto — layout e estilos apenas. As novas reclamações apareceriam abaixo.
+                </small>
+            </form>
+        </section>
+
+        <!-- Lista de reclamações -->
+        <section class="complaints" aria-label="Reclamações">
+            
+        </section>
+
+        <footer class="app__footer">
+            <nav class="footer-nav">
+                <a href="index.html" class="footer-nav__link">← Voltar ao início</a>
+            </nav>
+            <small class="app__meta">v0.3 · Ed. José Lopes</small>
+        </footer>
+    </main>
+</body>
+
+</html>

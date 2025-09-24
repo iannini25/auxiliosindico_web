@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastro — Prédio</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="page">
+  <main class="app app--center">
+    <h1>Criar conta</h1>
+    <form id="signup-form">
+      <label>Nome <input id="name" required /></label>
+      <label>Telefone <input id="phone" required /></label>
+      <label>Apartamento
+        <input id="apt" type="number" placeholder="Ex: 604" required />
+      </label>
+      <label>Email <input id="email" type="email" required /></label>
+      <button type="submit">Cadastrar</button>
+      <small>Senha inicial = número do apartamento</small>
+    </form>
+    <p><a href="/login.html">Já tenho conta</a></p>
+  </main>
+
+  <script type="module">
+    import { signUp, isValidApartment } from "assets/js/core/auth.js";
+    const form = document.getElementById("signup-form");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const apt = Number(document.getElementById("apt").value);
+      if (!isValidApartment(apt)) {
+        alert("Apartamento inválido. Use algo entre 201–204, 301–304, …, 601–604.");
+        return;
+      }
+      try {
+        await signUp({
+          name: document.getElementById("name").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          apt,
+          email: document.getElementById("email").value.trim()
+        });
+        window.location.href = "/index.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  </script>
+</body>
+</html>

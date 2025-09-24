@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atividades Concluídas – Prédio</title>
+    <meta name="description" content="Lista de atividades já concluídas no prédio." />
+    <link rel="stylesheet" href="assets/css/concluidas.css" />
+    <script type="module" src="assets/js/main.js" defer></script>
+</head>
+
+<body class="page" data-page="concluidas">
+
+    <script type="module">
+        import { requireAuth } from "/assets/js/core/auth.js";
+        requireAuth();
+    </script>
+
+    <main class="app" role="main">
+        <header class="app__header">
+            <h1 class="brand__title">Atividades Concluídas</h1>
+            <p class="brand__subtitle">Tudo que já foi finalizado</p>
+        </header>
+
+        <section class="tasks" aria-label="Atividades concluídas">
+
+        </section>
+
+        <footer class="app__footer">
+            <nav class="footer-nav">
+                <a href="index.html" class="footer-nav__link">← Voltar ao início</a>
+            </nav>
+            <small class="app__meta">v0.3 · Ed. José Lopes</small>
+        </footer>
+    </main>
+    <script type="module">
+        import { requireAuth } from "/assets/js/core/auth.js";
+        import { initConcluidas } from "/assets/js/pages/concluidas.js";
+        requireAuth(() => initConcluidas());
+    </script>
+
+</body>
+
+</html>
