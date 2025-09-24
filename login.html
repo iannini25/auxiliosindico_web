@@ -2,37 +2,80 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Login — Prédio</title>
+
+  <!-- estilos globais -->
   <link rel="stylesheet" href="assets/css/style.css" />
+  <meta name="theme-color" content="#141822" />
 </head>
-<body class="page">
-  <main class="app app--center">
-    <h1>Entrar</h1>
-    <form id="login-form">
-      <label>Email <input type="email" id="email" required /></label>
-      <label>Senha (nº do apto) <input type="password" id="pass" required /></label>
-      <button type="submit">Login</button>
-    </form>
-    <p><a href="signup.html">Não tem conta? Cadastre-se</a></p>
+<body class="page" data-page="login">
+  <main class="app app--center" role="main">
+    <!-- Cabeçalho -->
+    <header class="app__header" style="margin-bottom: 1rem;">
+      <h1 class="brand__title">Entrar</h1>
+      <p class="brand__subtitle">Bem-vindo de volta</p>
+    </header>
+
+    <!-- Formulário em card -->
+    <section class="panel" style="max-width: var(--maxw); width: 100%;">
+      <form id="login-form" class="form grid" style="display: grid; gap: 12px;">
+        <div class="field">
+          <label for="email" class="label">Email</label>
+          <input id="email" class="input" type="email" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="pass" class="label">Senha (nº do apto)</label>
+          <input id="pass" class="input" type="password" autocomplete="current-password" required />
+        </div>
+
+        <button class="btn btn--primary" type="submit">Login</button>
+
+        <!-- espaço para erros -->
+        <p id="form-error" class="alert" style="display:none; margin-top:.5rem;"></p>
+      </form>
+    </section>
+
+    <!-- Link secundário -->
+    <p style="margin-top: 1rem;">
+      <a class="link" href="signup.html">Não tem conta? Cadastre-se</a>
+    </p>
   </main>
 
+  <!-- script com caminho relativo -->
   <script type="module">
-    import { loginWithEmail } from "assets/js/core/auth.js";
+    import { loginWithEmail } from "./assets/js/core/auth.js";
+
     const form = document.getElementById("login-form");
+    const errBox = document.getElementById("form-error");
+
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.style.display = "block";
+    }
+    function clearError() {
+      errBox.textContent = "";
+      errBox.style.display = "none";
+    }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      clearError();
+
       try {
         await loginWithEmail({
           email: document.getElementById("email").value.trim(),
           aptPassword: document.getElementById("pass").value.trim()
         });
-        // redireciona para a home após login
-        window.location.href = "/index.html";
+        window.location.href = "index.html";
       } catch (err) {
-        alert(err.message);
+        showError(err?.message || "Não foi possível fazer login.");
       }
     });
+
+    // UX: foca no email ao abrir
+    document.getElementById("email").focus({ preventScroll: true });
   </script>
 </body>
 </html>
