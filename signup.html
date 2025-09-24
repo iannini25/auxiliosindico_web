@@ -2,48 +2,103 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Cadastro — Prédio</title>
+
+  <!-- estilos globais do projeto -->
   <link rel="stylesheet" href="assets/css/style.css" />
+
+  <!-- recomendações de iOS safe area e cor do tema -->
+  <meta name="theme-color" content="#141822" />
 </head>
-<body class="page">
-  <main class="app app--center">
-    <h1>Criar conta</h1>
-    <form id="signup-form">
-      <label>Nome <input id="name" required /></label>
-      <label>Telefone <input id="phone" required /></label>
-      <label>Apartamento
-        <input id="apt" type="number" placeholder="Ex: 604" required />
-      </label>
-      <label>Email <input id="email" type="email" required /></label>
-      <button type="submit">Cadastrar</button>
-      <small>Senha inicial = número do apartamento</small>
-    </form>
-    <p><a href="/login.html">Já tenho conta</a></p>
+<body class="page" data-page="signup">
+  <main class="app app--center" role="main">
+    <!-- Cabeçalho compacto como nas outras páginas -->
+    <header class="app__header" style="margin-bottom: 1rem;">
+      <h1 class="brand__title">Criar conta</h1>
+      <p class="brand__subtitle">Acesse o app do prédio</p>
+    </header>
+
+    <!-- Cartão do formulário (usa o mesmo visual de cards das outras páginas) -->
+    <section class="panel" style="max-width: var(--maxw); width: 100%;">
+      <form id="signup-form" class="form grid" style="display: grid; gap: 12px;">
+        <div class="field">
+          <label for="name" class="label">Nome</label>
+          <input id="name" class="input" autocomplete="name" required />
+        </div>
+
+        <div class="field">
+          <label for="phone" class="label">Telefone</label>
+          <input id="phone" class="input" inputmode="tel" autocomplete="tel" placeholder="(31) 9XXXX-XXXX" required />
+        </div>
+
+        <div class="field">
+          <label for="apt" class="label">Apartamento</label>
+          <input id="apt" class="input" type="number" inputmode="numeric" placeholder="Ex: 604" required />
+        </div>
+
+        <div class="field">
+          <label for="email" class="label">Email</label>
+          <input id="email" class="input" type="email" autocomplete="email" placeholder="voce@email.com" required />
+        </div>
+
+        <button class="btn btn--primary" type="submit">Cadastrar</button>
+
+        <p class="hint" style="color: var(--muted); margin: .25rem 0 0;">
+          Senha inicial = <strong>número do apartamento</strong>
+        </p>
+
+        <!-- área de erro amigável -->
+        <p id="form-error" class="alert" style="display:none; margin-top:.5rem;"></p>
+      </form>
+    </section>
+
+    <!-- Link secundário -->
+    <p style="margin-top: 1rem;">
+      <a class="link" href="login.html">Já tenho conta</a>
+    </p>
   </main>
 
+  <!-- Módulo: caminhos relativos para Pages/Netlify -->
   <script type="module">
     import { signUp, isValidApartment } from "assets/js/core/auth.js";
+
     const form = document.getElementById("signup-form");
+    const errBox = document.getElementById("form-error");
+
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.style.display = "block";
+    }
+    function clearError() {
+      errBox.textContent = "";
+      errBox.style.display = "none";
+    }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      clearError();
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const email = document.getElementById("email").value.trim();
       const apt = Number(document.getElementById("apt").value);
+
       if (!isValidApartment(apt)) {
-        alert("Apartamento inválido. Use algo entre 201–204, 301–304, …, 601–604.");
+        showError("Apartamento inválido. Use algo entre 201–204, 301–304, …, 601–604.");
         return;
       }
+
       try {
-        await signUp({
-          name: document.getElementById("name").value.trim(),
-          phone: document.getElementById("phone").value.trim(),
-          apt,
-          email: document.getElementById("email").value.trim()
-        });
-        window.location.href = "/index.html";
+        await signUp({ name, phone, apt, email });
+        window.location.href = "index.html";
       } catch (err) {
-        alert(err.message);
+        showError(err?.message || "Não foi possível cadastrar. Tente novamente.");
       }
     });
+
+    // UX: foco inicial em mobile
+    document.getElementById("name").focus({ preventScroll: true });
   </script>
 </body>
 </html>
