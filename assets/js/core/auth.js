@@ -44,6 +44,13 @@ export async function signUp({ name, phone, apt, email }) {
   const userCred = await createUserWithEmailAndPassword(auth, email, password);
   const uid = userCred.user.uid;
 
+  // Aguarda autenticação real antes de acessar Firestore
+  await new Promise((resolve) => {
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.uid === uid) resolve();
+    });
+  });
+
   try {
     // garante limite de 2 moradores por apartamento
     const aptRef = doc(db, "apartments", String(apt));
