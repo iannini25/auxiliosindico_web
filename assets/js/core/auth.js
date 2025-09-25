@@ -20,9 +20,11 @@ export function requireAuth(onReady) {
 
 // regra do seu projeto: senha = nº do apartamento (normalizada)
 function normalizeAptPassword(v) {
-  const s = String(v).trim();
-  // mantém apenas dígitos; evita "604 " diferente de "604"
-  return s.replace(/\D/g, "");
+  const digits = String(v).replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.length >= 6) return digits.slice(0, 72); // limite seguro
+  const times = Math.ceil(6 / digits.length);
+  return (digits.repeat(times)).slice(0, 72); // >=6 e com teto
 }
 
 // apartamentos válidos: 201–204, 301–304, …, 601–604
