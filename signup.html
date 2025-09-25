@@ -65,6 +65,7 @@
 
     const form = document.getElementById("signup-form");
     const errBox = document.getElementById("form-error");
+    const phoneInput = document.getElementById("phone");
 
     function showError(msg) {
       errBox.textContent = msg;
@@ -76,14 +77,35 @@
       errBox.style.display = "none";
     }
 
+    // 🔒 Limite e máscara de telefone (apenas números, máx 11 dígitos)
+    phoneInput.addEventListener("input", () => {
+      // remove tudo que não for número
+      let digits = phoneInput.value.replace(/\D/g, "");
+      // limita a 11 caracteres
+      if (digits.length > 11) digits = digits.slice(0, 11);
+      // aplica máscara simples (XX) XXXXX-XXXX
+      if (digits.length <= 2) {
+        phoneInput.value = digits;
+      } else if (digits.length <= 7) {
+        phoneInput.value = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      } else {
+        phoneInput.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      }
+    });
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearError();
 
       const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
+      const phone = phoneInput.value.replace(/\D/g, ""); // só números
       const email = document.getElementById("email").value.trim();
       const apt = Number(document.getElementById("apt").value);
+
+      if (phone.length !== 11) {
+        showError("Telefone inválido. Digite no formato DDD + número (11 dígitos).");
+        return;
+      }
 
       if (!isValidApartment(apt)) {
         showError("Apartamento inválido. Use algo entre 201–204, 301–304, …, 601–604.");
@@ -100,6 +122,7 @@
 
     document.getElementById("name").focus({ preventScroll: true });
   </script>
+
 </body>
 
 </html>
