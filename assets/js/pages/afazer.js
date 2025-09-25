@@ -1,4 +1,4 @@
-import { db, serverTimestamp } from "../core/firebaseStore.js";
+import { db, serverTimestamp } from "../core/firebaseStore.js"; 
 import {
   doc, getDoc, setDoc, collection, addDoc, onSnapshot, orderBy, query,
   updateDoc, deleteDoc
@@ -13,6 +13,14 @@ const safe = (obj) => {
   Object.keys(copy).forEach((k) => copy[k] === undefined && delete copy[k]);
   return copy;
 };
+
+// resolve o nome para exibir/gravar no comentário
+function resolveDisplayName(user, profile) {
+  const n1 = (profile?.name || "").trim();
+  const n2 = (user?.displayName || "").trim();
+  const n3 = (user?.email ? user.email.split("@")[0] : "").trim();
+  return n1 || n2 || n3 || "Morador";
+}
 
 export async function initAfazer() {
   const { user, profile } = await getCurrentUserWithRole();
@@ -103,9 +111,13 @@ function wireComments(taskId, cardEl, profile, user) {
         li.className = "task-comment";
         const when = c.createdAt?.toDate ? c.createdAt.toDate() : null;
         const t = when ? `${two(when.getDate())}/${two(when.getMonth() + 1)} ${two(when.getHours())}:${two(when.getMinutes())}` : "";
+
+        // usa o nome salvo; se vier vazio, cai no fallback
+        const name = (c.authorName || "").toString() || "Morador";
+
         li.innerHTML = `
           <div class="task-comment__meta">
-            <span class="task-comment__author">${esc(c.authorName || "Morador")}</span>
+            <span class="task-comment__author">${esc(name)}</span>
             <span class="task-comment__sep">•</span>
             <time class="task-comment__time">${t}</time>
           </div>
@@ -127,7 +139,7 @@ function wireComments(taskId, cardEl, profile, user) {
           text,
           // usa sempre o UID do Auth; nunca envie undefined
           authorUid: user?.uid ?? profile?.uid ?? profile?.id ?? null,
-          authorName: (profile?.name || "Morador").trim(),
+          authorName: resolveDisplayName(user, profile),
           authorApt: profile?.apt ?? null,
           createdAt: serverTimestamp(),
         });
