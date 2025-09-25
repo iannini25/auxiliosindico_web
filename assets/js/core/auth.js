@@ -18,7 +18,7 @@ export function requireAuth(onReady) {
   });
 }
 
-// regra do seu projeto: senha = nº do apartamento (normalizada)
+// regra: senha = número do apto repetido até ter 6 dígitos (ex.: 604 -> 604604)
 function normalizeAptPassword(v) {
   const digits = String(v).replace(/\D/g, "");
   if (!digits) return "";
@@ -32,7 +32,7 @@ export function isValidApartment(apt) {
   const n = Number(apt);
   const andar = Math.floor(n / 100);
   const num = n % 100;
-  return [2,3,4,5,6].includes(andar) && [1,2,3,4].includes(Math.floor(num/1)) && (andar*100 + num) >= 201 && (andar*100 + num) <= 604;
+  return [2, 3, 4, 5, 6].includes(andar) && (num >= 1 && num <= 4) && n >= 201 && n <= 604;
 }
 
 // Cadastro + criação de documentos no Firestore em transação
@@ -43,10 +43,10 @@ export async function signUp({ name, phone, apt, email }) {
   }
 
   // cria usuário no Auth
-  const userCred = await createUserWithEmailAndPassword(auth, email, password);
+  const userCred = await createUserWithEmailAndPassword(auth, String(email).trim().toLowerCase(), password);
   const uid = userCred.user.uid;
 
-  // Aguarda autenticação real antes de acessar Firestore
+  // Aguarda autenticação real antes de acessar Firestore (garante request.auth.uid nas rules)
   await new Promise((resolve) => {
     onAuthStateChanged(auth, (user) => {
       if (user && user.uid === uid) resolve();
@@ -80,7 +80,7 @@ export async function signUp({ name, phone, apt, email }) {
       name: name?.trim() || "",
       phone: phone?.trim() || "",
       apt: Number(apt),
-      email: email?.trim()?.toLowerCase() || "",
+      email: String(email).trim().toLowerCase(),
       role: "resident",
       createdAt: serverTimestamp(),
     });
@@ -92,6 +92,21 @@ export async function signUp({ name, phone, apt, email }) {
   }
 }
 
+// Login com fallback p/ contas antigas (pré-regra da repetição)
 export async function loginWithEmail({ email, aptPassword }) {
-  await signInWithEmailAndPassword(auth, String(email).trim().toLowerCase(), normalizeAptPassword(aptPassword));
+  const emailLower = String(email).trim().toLowerCase();
+  const passPrimary = normalizeAptPassword(aptPassword);      // regra nova (repetida até 6)
+  const passRaw     = String(aptPassword).replace(/\D/g, ""); // compat com contas antigas
+
+  try {
+    await signInWithEmailAndPassword(auth, emailLower, passPrimary);
+    return;
+  } catch (err) {
+    if (err?.code === "auth/invalid-credential" && passRaw && passRaw !== passPrimary) {
+      // tenta com a senha “crua” (ex.: 604) se a “repetida” falhar
+      await signInWithEmailAndPassword(auth, emailLower, passRaw);
+      return;
+    }
+    throw err;
+  }
 }
