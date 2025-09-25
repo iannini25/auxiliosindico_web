@@ -1,3 +1,4 @@
+// assets/js/pages/sugestoes.js
 import { db, serverTimestamp } from "../core/firebaseStore.js";
 import {
   collection, addDoc, doc, setDoc, getDoc, onSnapshot, query, where, orderBy, deleteDoc, updateDoc
@@ -12,39 +13,47 @@ export async function initSugestoes() {
   const list = document.querySelector(".suggestions");
   if (!form || !list) return;
 
-  // enviar
+  // ENVIAR SUGESTÃO
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const ta = form.querySelector("#sugestao");
     const text = (ta?.value || "").trim();
     if (!text) return alert("Escreva a sugestão.");
+
     const [title, ...rest] = text.split(/\n/);
     const description = rest.join("\n").trim();
 
     try {
-      await addDoc(collection(db, "suggestions"), {
-        title: title.slice(0, 120),
+      const ref = await addDoc(collection(db, "suggestions"), {
+        title: (title || "Sugestão").slice(0, 120),
         description,
         text,
         status: "pendente",
         createdAt: serverTimestamp(),
         authorUid: user.uid,
         authorName: profile?.name || "",
-        authorApt: profile?.apt || null,
+        authorApt: profile?.apt ?? null,
       });
+      // console.info("[suggestions] created:", ref.path); // opcional p/ conferir no console
       ta.value = "";
-    } catch (err) { alert(err.message); }
+    } catch (err) {
+      alert(err?.message || "Não foi possível enviar a sugestão.");
+    }
   });
 
-  // listar (pendentes e aprovadas) — se você criou o índice, mantenha o orderBy
-  const q = query(
-    collection(db, "suggestions"),
-    where("status", "in", ["pendente", "aprovada"]),
-    orderBy("createdAt", "desc")
-  );
+  // LISTAR (pendente + aprovada) SEM EXIGIR ÍNDICE COMPOSTO
+  // Em vez de where(..., "in", [...]) + orderBy(...), usamos só orderBy e filtramos no cliente.
+  const q = query(collection(db, "suggestions"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
     list.innerHTML = "";
-    snap.forEach((d) => list.appendChild(renderSuggestion(d.id, d.data(), user.uid)));
+    snap.forEach((d) => {
+      const s = d.data();
+      if (s?.status === "pendente" || s?.status === "aprovada") {
+        list.appendChild(renderSuggestion(d.id, s, user.uid));
+      }
+    });
+  }, (err) => {
+    console.error("Erro ao carregar sugestões:", err);
   });
 }
 
@@ -102,10 +111,7 @@ function renderSuggestion(id, s, myUid) {
   return el;
 }
 
-// 1 voto por pessoa:
-// - se não votou -> cria doc
-// - se clicou no MESMO voto -> remove doc (retira voto)
-// - se clicou no OUTRO voto -> atualiza doc (troca)
+// 1 voto por pessoa: cria / troca / remove
 async function vote(suggestionId, uid, value) {
   const ref = doc(db, "suggestionVotes", `${suggestionId}_${uid}`);
   const ex  = await getDoc(ref);
