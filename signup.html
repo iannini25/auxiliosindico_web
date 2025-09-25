@@ -6,20 +6,18 @@
   <title>Cadastro — Prédio</title>
 
   <!-- estilos globais do projeto -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
 
   <!-- recomendações de iOS safe area e cor do tema -->
   <meta name="theme-color" content="#141822" />
 </head>
 <body class="page" data-page="signup">
   <main class="app app--center" role="main">
-    <!-- Cabeçalho compacto como nas outras páginas -->
     <header class="app__header" style="margin-bottom: 1rem;">
       <h1 class="brand__title">Criar conta</h1>
       <p class="brand__subtitle">Acesse o app do prédio</p>
     </header>
 
-    <!-- Cartão do formulário -->
     <section class="panel" style="max-width: var(--maxw); width: 100%;">
       <form id="signup-form" class="form grid" style="display: grid; gap: 12px;">
         <div class="field">
@@ -48,21 +46,18 @@
           Senha inicial = <strong>número do apartamento</strong>
         </p>
 
-        <!-- área de erro amigável -->
         <p id="form-error" class="alert" style="display:none; margin-top:.5rem;"></p>
       </form>
     </section>
 
-    <!-- Link secundário -->
     <p style="margin-top: 1rem;">
       <a class="link" href="login.html">Já tenho conta</a>
     </p>
   </main>
 
-  <!-- Módulo: caminhos relativos para Pages/Netlify -->
+  <!-- Caminho corrigido -->
   <script type="module">
-    // IMPORTS CORRETOS (arquivos estão na raiz do projeto)
-    import { signUp, isValidApartment } from "auth.js";
+    import { signUp, isValidApartment } from "./assets/js/core/auth.js";
 
     const form = document.getElementById("signup-form");
     const errBox = document.getElementById("form-error");
@@ -71,6 +66,7 @@
       errBox.textContent = msg;
       errBox.style.display = "block";
     }
+
     function clearError() {
       errBox.textContent = "";
       errBox.style.display = "none";
@@ -92,14 +88,12 @@
 
       try {
         await signUp({ name, phone, apt, email });
-        // redireciona para a home após cadastro
-        window.location.href = "index.html";
+        window.location.href = "./index.html";
       } catch (err) {
         showError(err?.message || "Não foi possível cadastrar. Tente novamente.");
       }
     });
 
-    // UX: foco inicial em mobile
     document.getElementById("name").focus({ preventScroll: true });
   </script>
 </body>
