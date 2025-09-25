@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -11,6 +12,7 @@
   <!-- recomendações de iOS safe area e cor do tema -->
   <meta name="theme-color" content="#141822" />
 </head>
+
 <body class="page" data-page="signup">
   <main class="app app--center" role="main">
     <header class="app__header" style="margin-bottom: 1rem;">
@@ -43,8 +45,10 @@
         <button class="btn btn--primary" type="submit">Cadastrar</button>
 
         <p class="hint" style="color: var(--muted); margin: .25rem 0 0;">
-          Senha inicial = <strong>número do apartamento</strong>
+          Senha inicial = <strong>número do apartamento repetido até 6 dígitos</strong>
+          (ex.: 604 → 604604)
         </p>
+
 
         <p id="form-error" class="alert" style="display:none; margin-top:.5rem;"></p>
       </form>
@@ -97,4 +101,5 @@
     document.getElementById("name").focus({ preventScroll: true });
   </script>
 </body>
+
 </html>
