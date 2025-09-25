@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <meta name="theme-color" content="#141822" />
 </head>
+
 <body class="page" data-page="login">
   <main class="app app--center" role="main">
     <!-- Cabeçalho -->
@@ -45,10 +47,11 @@
 
   <!-- script com caminho relativo -->
   <script type="module">
-    import { loginWithEmail } from "assets/js/core/auth.js";
+    import { loginWithEmail } from "./assets/js/core/auth.js";
 
     const form = document.getElementById("login-form");
     const errBox = document.getElementById("form-error");
+    const btn = form.querySelector('button[type="submit"]');
 
     function showError(msg) {
       errBox.textContent = msg;
@@ -62,21 +65,37 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearError();
+      btn.disabled = true;
+
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("pass").value.trim();
 
       try {
-        await loginWithEmail({
-          email: document.getElementById("email").value.trim(),
-          aptPassword: document.getElementById("pass").value.trim()
-        });
+        if (!email || !pass) {
+          showError("Preencha email e senha (nº do apto).");
+          return;
+        }
+        await loginWithEmail({ email, aptPassword: pass });
         window.location.href = "index.html";
       } catch (err) {
-        showError(err?.message || "Não foi possível fazer login.");
+        // mapeia mensagens mais amigáveis
+        const map = {
+          "auth/invalid-credential": "Email e/ou senha inválidos.",
+          "auth/invalid-email": "Email inválido.",
+          "auth/user-not-found": "Usuário não encontrado.",
+          "auth/too-many-requests": "Muitas tentativas. Tente novamente em alguns minutos."
+        };
+        const code = err?.code || "";
+        showError(map[code] || (err?.message || "Não foi possível fazer login."));
+      } finally {
+        btn.disabled = false;
       }
     });
 
     // UX: foca no email ao abrir
     document.getElementById("email").focus({ preventScroll: true });
   </script>
-</body>
-</html>
 
+</body>
+
+</html>
