@@ -7,6 +7,13 @@ import { getCurrentUserWithRole } from "../core/store.js";
 
 const STATUS_OK = new Set(["todo", "doing", "late"]);
 
+// remove chaves undefined antes de enviar ao Firestore
+const safe = (obj) => {
+  const copy = { ...obj };
+  Object.keys(copy).forEach((k) => copy[k] === undefined && delete copy[k]);
+  return copy;
+};
+
 export async function initAfazer() {
   const { user, profile } = await getCurrentUserWithRole();
   const isModerator = (profile?.role === "moderator");
@@ -39,7 +46,7 @@ export async function initAfazer() {
     }
 
     // comentários (live)
-    wireComments(id, card, profile);
+    wireComments(id, card, profile, user);
 
     // botões de admin nos cards estáticos (se moderador)
     if (isModerator) injectAdminActions(card, id);
@@ -71,7 +78,7 @@ export async function initAfazer() {
 
       // cria/atualiza o card
       const existing = list.querySelector(`[data-id="${id}"]`);
-      const card = renderTaskCard(id, t, st, isModerator);
+      const card = renderTaskCard(id, t, st, isModerator, user);
       if (existing) existing.replaceWith(card);
       else list.prepend(card);
     });
@@ -81,7 +88,8 @@ export async function initAfazer() {
   });
 }
 
-function wireComments(taskId, cardEl, profile) {
+// ===== Comentários =====
+function wireComments(taskId, cardEl, profile, user) {
   const list = cardEl.querySelector(".task-comments__list");
   const form = cardEl.querySelector(".task-comment-form");
 
@@ -107,6 +115,7 @@ function wireComments(taskId, cardEl, profile) {
       });
     });
   }
+
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -114,13 +123,15 @@ function wireComments(taskId, cardEl, profile) {
       const text = input?.value?.trim();
       if (!text) return;
       try {
-        await addDoc(collection(db, "tasks", taskId, "comments"), {
+        const payload = safe({
           text,
-          authorUid: profile?.id,
-          authorName: profile?.name || "",
-          authorApt: profile?.apt || null,
+          // usa sempre o UID do Auth; nunca envie undefined
+          authorUid: user?.uid ?? profile?.uid ?? profile?.id ?? null,
+          authorName: (profile?.name || "Morador").trim(),
+          authorApt: profile?.apt ?? null,
           createdAt: serverTimestamp(),
         });
+        await addDoc(collection(db, "tasks", taskId, "comments"), payload);
         input.value = "";
       } catch (err) { alert(err.message); }
     });
@@ -175,7 +186,7 @@ function normalizeStatus(status, dueDate) {
   return st;
 }
 
-function renderTaskCard(id, t, st, isModerator = false) {
+function renderTaskCard(id, t, st, isModerator = false, user = null) {
   const when = t.createdAt?.toDate ? t.createdAt.toDate() : null;
   const whenStr = when ? `${two(when.getDate())}/${two(when.getMonth() + 1)}/${when.getFullYear()}` : "—";
 
@@ -220,8 +231,8 @@ function renderTaskCard(id, t, st, isModerator = false) {
     </section>
   `;
 
-  // liga comentários (mesma lógica dos cards estáticos)
-  wireComments(id, el, {});
+  // liga comentários (mesma lógica dos cards estáticos) — agora passando user
+  wireComments(id, el, {}, user);
 
   // liga ações de moderador (se houver)
   if (isModerator) bindAdminActions(el, id);
